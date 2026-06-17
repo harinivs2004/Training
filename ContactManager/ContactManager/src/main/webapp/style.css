@@ -1,0 +1,49 @@
+body {
+    font-family: Arial;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: blue;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+}
+
+input, button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 80%;
+}
+
+button, .btn {
+    background-color: green;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: inline-block;
+}
+
+table {
+    width: 90%;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    input {
+        width: 95%;
+    }
+}
