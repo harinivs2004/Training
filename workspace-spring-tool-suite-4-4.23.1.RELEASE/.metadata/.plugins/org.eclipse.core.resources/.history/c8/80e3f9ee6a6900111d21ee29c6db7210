@@ -1,0 +1,90 @@
+package com.wipro.service;
+ 
+import com.wipro.dto.ReviewDTO;
+import com.wipro.entity.*;
+import com.wipro.repository.*;
+import com.wipro.service.impl.ReviewServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+ 
+@ExtendWith(MockitoExtension.class)
+public class ReviewServiceImplTest {
+ 
+    @Mock private ReviewRepository reviewRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private AppRepository appRepository;
+ 
+    @InjectMocks private ReviewServiceImpl reviewService;
+ 
+    @Test
+    void testCreateReview_PositiveSentiment() {
+        User user = new User(); user.setId(1L); user.setRole(User.Role.USER);
+        App app = new App(); app.setId(1L);
+        Category cat = new Category(); cat.setId(1L);
+        app.setCategory(cat);
+        User dev = new User(); dev.setId(2L);
+        app.setDeveloper(dev);
+ 
+        ReviewDTO dto = new ReviewDTO();
+        dto.setUserId(1L);
+        dto.setAppId(1L);
+        dto.setComment("This app is amazing and excellent!");
+        dto.setRating(5);
+ 
+        Review savedReview = new Review();
+        savedReview.setId(1L);
+        savedReview.setComment(dto.getComment());
+        savedReview.setRating(5);
+        savedReview.setSentiment("POSITIVE");
+        savedReview.setUser(user);
+        savedReview.setApp(app);
+ 
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+        when(reviewRepository.save(any(Review.class))).thenReturn(savedReview);
+ 
+        ReviewDTO result = reviewService.createReview(dto);
+ 
+        assertNotNull(result);
+        assertEquals("POSITIVE", result.getSentiment());
+        assertEquals(5, result.getRating());
+    }
+ 
+    @Test
+    void testCreateReview_NegativeSentiment() {
+        User user = new User(); user.setId(1L); user.setRole(User.Role.USER);
+        App app = new App(); app.setId(1L);
+        Category cat = new Category(); cat.setId(1L);
+        app.setCategory(cat);
+        User dev = new User(); dev.setId(2L);
+        app.setDeveloper(dev);
+ 
+        ReviewDTO dto = new ReviewDTO();
+        dto.setUserId(1L); dto.setAppId(1L);
+        dto.setComment("Terrible app, worst experience ever");
+        dto.setRating(1);
+ 
+        Review savedReview = new Review();
+        savedReview.setId(1L);
+        savedReview.setComment(dto.getComment());
+        savedReview.setRating(1);
+        savedReview.setSentiment("NEGATIVE");
+        savedReview.setUser(user);
+        savedReview.setApp(app);
+ 
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+        when(reviewRepository.save(any(Review.class))).thenReturn(savedReview);
+ 
+        ReviewDTO result = reviewService.createReview(dto);
+ 
+        assertEquals("NEGATIVE", result.getSentiment());
+    }
+}

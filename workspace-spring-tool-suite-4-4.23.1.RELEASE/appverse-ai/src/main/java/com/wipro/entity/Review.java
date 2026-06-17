@@ -1,0 +1,54 @@
+package com.wipro.entity;
+ 
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+ 
+@Entity
+@Table(name = "review")
+public class Review {
+ 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+ 
+    @Column(nullable = false)
+    private String comment;
+ 
+    @Column(nullable = false)
+    private Integer rating;
+    private String sentiment; // POSITIVE, NEGATIVE, NEUTRAL
+    
+    // Add getter and setter
+   public String getSentiment() { return sentiment; }
+   public void setSentiment(String sentiment) { this.sentiment = sentiment; }
+ 
+    private LocalDateTime reviewDate;
+ 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+ 
+    @ManyToOne
+    @JoinColumn(name = "app_id", nullable = false)
+    private App app;
+ 
+    public Review() {}
+ 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+ 
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
+ 
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
+ 
+    public LocalDateTime getReviewDate() { return reviewDate; }
+    public void setReviewDate(LocalDateTime reviewDate) { this.reviewDate = reviewDate; }
+ 
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+ 
+    public App getApp() { return app; }
+    public void setApp(App app) { this.app = app; }
+}

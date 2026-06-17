@@ -1,0 +1,14 @@
+package com.wipro.service;
+ 
+import com.wipro.dto.AppDTO;
+import java.util.List;
+ 
+public interface AppService {
+    AppDTO createApp(AppDTO appDTO);
+    AppDTO getAppById(Long id);
+    List<AppDTO> getAllApps();
+    List<AppDTO> searchApps(String keyword);
+    List<AppDTO> getAppsByCategory(Long categoryId);
+    AppDTO updateApp(Long id, AppDTO appDTO);
+    void deleteApp(Long id);
+}

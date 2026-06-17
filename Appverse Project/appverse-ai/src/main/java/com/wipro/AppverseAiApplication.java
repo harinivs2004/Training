@@ -1,0 +1,11 @@
+package com.wipro;
+ 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+ 
+@SpringBootApplication
+public class AppverseAiApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(AppverseAiApplication.class, args);
+    }
+}

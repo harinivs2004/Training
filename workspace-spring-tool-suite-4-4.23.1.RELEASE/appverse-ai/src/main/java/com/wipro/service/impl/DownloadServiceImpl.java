@@ -1,0 +1,80 @@
+package com.wipro.service.impl;
+ 
+import com.wipro.dto.DownloadDTO;
+import com.wipro.entity.*;
+import com.wipro.exception.ResourceNotFoundException;
+import com.wipro.repository.*;
+import com.wipro.service.DownloadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+ 
+@Service
+public class DownloadServiceImpl implements DownloadService {
+ 
+    private static final Logger log = LoggerFactory.getLogger(DownloadServiceImpl.class);
+ 
+    private final DownloadRepository downloadRepository;
+    private final UserRepository userRepository;
+    private final AppRepository appRepository;
+ 
+    public DownloadServiceImpl(DownloadRepository downloadRepository, UserRepository userRepository, AppRepository appRepository) {
+        this.downloadRepository = downloadRepository;
+        this.userRepository = userRepository;
+        this.appRepository = appRepository;
+    }
+ 
+    @Override
+    public DownloadDTO downloadApp(Long userId, Long appId) {
+        log.info("User {} downloading app {}", userId, appId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        App app = appRepository.findById(appId)
+                .orElseThrow(() -> new ResourceNotFoundException("App not found with id: " + appId));
+        Download download = new Download();
+        download.setUser(user);
+        download.setApp(app);
+        download.setDownloadedAt(LocalDateTime.now());
+        
+        Long currentDownloads = app.getTotalDownloads() != null ? app.getTotalDownloads() : 0L;
+        app.setTotalDownloads(currentDownloads + 1);
+        appRepository.save(app);
+        return mapToDTO(downloadRepository.save(download));
+    }
+ 
+    @Override
+    public List<DownloadDTO> getDownloadsByUser(Long userId) {
+        log.info("Fetching downloads for user id: {}", userId);
+        return downloadRepository.findByUserId(userId).stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+ 
+    @Override
+    public List<DownloadDTO> getDownloadsByApp(Long appId) {
+        log.info("Fetching downloads for app id: {}", appId);
+        return downloadRepository.findByAppId(appId).stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+ 
+    @Override
+    public long getTotalDownloads(Long appId) {
+        log.info("Getting total downloads for app id: {}", appId);
+        return downloadRepository.countByAppId(appId);
+    }
+ 
+    @Override
+    public List<DownloadDTO> getAllDownloads() {
+        log.info("Fetching all downloads");
+        return downloadRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+ 
+    private DownloadDTO mapToDTO(Download d) {
+        DownloadDTO dto = new DownloadDTO();
+        dto.setId(d.getId());
+        dto.setDownloadedAt(d.getDownloadedAt());
+        dto.setUserId(d.getUser().getId());
+        dto.setAppId(d.getApp().getId());
+        return dto;
+    }
+}

@@ -1,0 +1,94 @@
+package com.wipro.service.impl;
+ 
+import com.wipro.dto.ReviewDTO;
+import com.wipro.entity.*;
+import com.wipro.exception.ResourceNotFoundException;
+import com.wipro.repository.*;
+import com.wipro.service.ReviewService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+ 
+@Service
+public class ReviewServiceImpl implements ReviewService {
+ 
+    private static final Logger log = LoggerFactory.getLogger(ReviewServiceImpl.class);
+ 
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
+    private final AppRepository appRepository;
+ 
+    public ReviewServiceImpl(ReviewRepository reviewRepository, UserRepository userRepository, AppRepository appRepository) {
+        this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
+        this.appRepository = appRepository;
+    }
+ 
+    @Override
+    public ReviewDTO createReview(ReviewDTO dto) {
+        log.info("Creating review for app id: {}", dto.getAppId());
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getUserId()));
+        App app = appRepository.findById(dto.getAppId())
+                .orElseThrow(() -> new ResourceNotFoundException("App not found with id: " + dto.getAppId()));
+        Review review = new Review();
+        review.setComment(dto.getComment());
+        review.setRating(dto.getRating());
+        review.setReviewDate(LocalDateTime.now());
+        review.setUser(user);
+        review.setApp(app);
+        return mapToDTO(reviewRepository.save(review));
+    }
+ 
+    @Override
+    public ReviewDTO getReviewById(Long id) {
+        log.info("Fetching review by id: {}", id);
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + id));
+        return mapToDTO(review);
+    }
+ 
+    @Override
+    public List<ReviewDTO> getAllReviews() {
+        log.info("Fetching all reviews");
+        return reviewRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+ 
+    @Override
+    public List<ReviewDTO> getReviewsByAppId(Long appId) {
+        log.info("Fetching reviews for app id: {}", appId);
+        return reviewRepository.findByAppId(appId).stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+ 
+    @Override
+    public ReviewDTO updateReview(Long id, ReviewDTO dto) {
+        log.info("Updating review with id: {}", id);
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + id));
+        review.setComment(dto.getComment());
+        review.setRating(dto.getRating());
+        return mapToDTO(reviewRepository.save(review));
+    }
+ 
+    @Override
+    public void deleteReview(Long id) {
+        log.info("Deleting review with id: {}", id);
+        reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + id));
+        reviewRepository.deleteById(id);
+    }
+ 
+    private ReviewDTO mapToDTO(Review r) {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setId(r.getId());
+        dto.setComment(r.getComment());
+        dto.setRating(r.getRating());
+        dto.setReviewDate(r.getReviewDate());
+        dto.setUserId(r.getUser().getId());
+        dto.setAppId(r.getApp().getId());
+        return dto;
+    }
+}
